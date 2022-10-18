@@ -81,6 +81,7 @@ protected:
 private:
     Ui::MainMenu *ui;
     TcpServer *server;
+    QWidget *currentPage;
     Dialog *popupQuery=nullptr;
     PopupStatus *popupStatus=nullptr;
     UserInfo *userInfoForm;

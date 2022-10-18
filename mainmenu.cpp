@@ -13,7 +13,9 @@ MainMenu::MainMenu(QWidget *parent) :
     this->setWindowTitle("Product Tracability");
 
     this->setWindowIcon(QIcon("ProductTraceability.ico"));
-    ui->stackedWidget->setCurrentWidget(ui->homePage);
+    this->currentPage = ui->homePage;
+    ui->stackedWidget->setCurrentWidget(this->currentPage);
+
     ui->stackedWidget->installEventFilter(this);
     inputField = PT_INPUT_FIELD_NONE;
     overallTestStatus = 0;
@@ -78,7 +80,9 @@ void MainMenu::on_cpuButton_clicked()
     ui->cpuSerialInputFrame->setStyleSheet("QFrame { border: 1px solid rgb(50,205,50); }");
 
     clearTestResults();
-    ui->stackedWidget->setCurrentWidget(ui->cpuPage);
+    this->currentPage = ui->cpuPage;
+    ui->stackedWidget->setCurrentWidget(this->currentPage);
+
     ui->cpuOverallTestStatus->setText("");
     ui->cpuOverallTestStatus->setStyleSheet("QLabel { background-color : white; color : white; }");
     ui->cpuSaveResultStatus->setText("");
@@ -104,8 +108,11 @@ void MainMenu::on_lanButton_clicked()
     ui->lanMacInputField->setStyleSheet("QLabel { background-color : rgb(240, 240, 245); color : black; }");
     ui->lanMacInputField->setText("");
     ui->lanMacInputFrame->setStyleSheet("QFrame { border: 0px solid rgb(119, 227, 237); }");
+
     clearTestResults();
-    ui->stackedWidget->setCurrentWidget(ui->lanPage);
+    this->currentPage = ui->lanPage;
+    ui->stackedWidget->setCurrentWidget(this->currentPage);
+
     ui->lanOverallTestStatus->setText("");
     ui->lanOverallTestStatus->setStyleSheet("QLabel { background-color : white; color : white; }");
     ui->lanSaveResultStatus->setText("");
@@ -115,15 +122,19 @@ void MainMenu::on_lanButton_clicked()
 void MainMenu::on_cpuGoHome_clicked()
 {
     inputField = PT_INPUT_FIELD_NONE;
-    ui->stackedWidget->setCurrentWidget(ui->homePage);
     clearTestResults();
+    this->currentPage = ui->homePage;
+    ui->stackedWidget->setCurrentWidget(this->currentPage);
+
 }
 
 void MainMenu::on_lanGoHome_clicked()
 {
     inputField = PT_INPUT_FIELD_NONE;
-    ui->stackedWidget->setCurrentWidget(ui->homePage);
     clearTestResults();
+    this->currentPage = ui->homePage;
+    ui->stackedWidget->setCurrentWidget(this->currentPage);
+
 }
 
 bool MainMenu::eventFilter(QObject *obj, QEvent *event) {
@@ -136,7 +147,7 @@ bool MainMenu::eventFilter(QObject *obj, QEvent *event) {
 void MainMenu::eventKeyPressed(QKeyEvent* event)
 {
 
-    if(ui->stackedWidget->currentWidget() == ui->lanPage) {
+    if(this->currentPage == ui->lanPage) {
         switch(inputField) {
         case PT_INPUT_FIELD_SERIAL_NUMBER:
             inputFieldShow = ui->lanSerialInputField;
@@ -151,7 +162,7 @@ void MainMenu::eventKeyPressed(QKeyEvent* event)
             inputFieldShow = nullptr;
             break;
         }
-    } else if (ui->stackedWidget->currentWidget() ==  ui->cpuPage) {
+    } else if (this->currentPage ==  ui->cpuPage) {
         switch(inputField) {
         case PT_INPUT_FIELD_SERIAL_NUMBER:
             inputFieldShow = ui->cpuSerialInputField;
@@ -174,7 +185,7 @@ void MainMenu::eventKeyPressed(QKeyEvent* event)
     case Qt::Key_Enter:
     case Qt::Key_Return:
         clearTestResults();
-        if(ui->stackedWidget->currentWidget() == ui->lanPage) {
+        if(this->currentPage == ui->lanPage) {
             if ((inputField == PT_INPUT_FIELD_SERIAL_NUMBER) && (inputValue.size() == 30)) {
                 serialNumber = inputValue;
                 ui->lanSerialStatus->setStyleSheet("QLabel { background-color : rgb(255, 255, 255); color : black; }");
@@ -232,7 +243,7 @@ void MainMenu::eventKeyPressed(QKeyEvent* event)
                 inputValue.clear();
             }
 
-        } else if (ui->stackedWidget->currentWidget() == ui->cpuPage) {
+        } else if (this->currentPage == ui->cpuPage) {
             if ((inputField == PT_INPUT_FIELD_SERIAL_NUMBER) && (inputValue.size() == 30)) {
                 serialNumber = inputValue;
                 emit submitCpuData(serialNumber);
@@ -316,14 +327,14 @@ void MainMenu::showTestResult(QString statusNo, QString statusName, QString sts)
         overallTestStatus++;
     }
 
-    if (ui->stackedWidget->currentWidget() == ui->cpuPage) {
+    if (this->currentPage == ui->cpuPage) {
         cpuWidgetItem = new QListWidgetItem(ui->cpuListWidget);
         cpuWidgetItem->setSizeHint(QSize(500, 25));
         statusItemWidget *tempWidget = new statusItemWidget(statusNo, statusName, sts, cpuWidgetItem, this);
         ui->cpuListWidget->addItem(cpuWidgetItem);
         ui->cpuListWidget->setItemWidget(cpuWidgetItem, tempWidget);
     }
-    if (ui->stackedWidget->currentWidget() == ui->lanPage) {
+    if (this->currentPage == ui->lanPage) {
         lanWidgetItem = new QListWidgetItem(ui->lanListWidget);
         lanWidgetItem->setSizeHint(QSize(500, 25));
         statusItemWidget *tempWidget = new statusItemWidget(statusNo, statusName, sts, lanWidgetItem, this);
@@ -345,7 +356,7 @@ void MainMenu::on_postTestResults(QByteArray data) {
 void MainMenu::on_postOverallTestResult(QByteArray data) {
     QString strData = QString::fromUtf8(data.remove(0,14));
     strData.chop(1);
-    if (ui->stackedWidget->currentWidget() == ui->cpuPage) {
+    if (this->currentPage == ui->cpuPage) {
         if(strData=="0") {
             ui->cpuOverallTestStatus->setText("OK");
             ui->cpuOverallTestStatus->setStyleSheet("QLabel { background-color : green; color : white; }");
@@ -355,7 +366,7 @@ void MainMenu::on_postOverallTestResult(QByteArray data) {
         }
     }
 
-    if (ui->stackedWidget->currentWidget() == ui->lanPage) {
+    if (this->currentPage == ui->lanPage) {
         if(strData=="0") {
             ui->lanOverallTestStatus->setText("OK");
             ui->lanOverallTestStatus->setStyleSheet("QLabel { background-color : green; color : white; }");
@@ -369,7 +380,7 @@ void MainMenu::on_postOverallTestResult(QByteArray data) {
 void MainMenu::on_postSaveResultStatus(QByteArray data) {
     QString strData = QString::fromUtf8(data.remove(0,14));
     strData.chop(1);
-    if (ui->stackedWidget->currentWidget() == ui->cpuPage) {
+    if (this->currentPage == ui->cpuPage) {
         if(strData=="0") {
             ui->cpuSaveResultStatus->setText("OK");
             ui->cpuSaveResultStatus->setStyleSheet("QLabel { background-color : green; color : white; }");
@@ -379,7 +390,7 @@ void MainMenu::on_postSaveResultStatus(QByteArray data) {
         }
     }
 
-    if (ui->stackedWidget->currentWidget() == ui->lanPage) {
+    if (this->currentPage == ui->lanPage) {
         if(strData=="0") {
             ui->lanSaveResultStatus->setText("OK");
             ui->lanSaveResultStatus->setStyleSheet("QLabel { background-color : green; color : white; }");
@@ -411,8 +422,12 @@ void MainMenu::on_popupQueryMessageFinished() {
         delete this->popupQuery;
         this->popupQuery = nullptr;
     }
+#ifdef USING_SET_FOCUS_METHOD
     this->activateWindow();
     this->setFocus();
+#else
+    ui->stackedWidget->setCurrentWidget(this->currentPage);
+#endif
 }
 
 void MainMenu::on_popupStatusMessage(QString msg) {
@@ -433,8 +448,12 @@ void MainMenu::on_popupStatusMessageClose() {
         delete this->popupStatus;
         this->popupStatus = nullptr;
     }
+#ifdef USING_SET_FOCUS_METHOD
     this->activateWindow();
     this->setFocus();
+#else
+    ui->stackedWidget->setCurrentWidget(this->currentPage);
+#endif
 }
 
 void MainMenu::on_showTestProgress(QString msg) {
@@ -445,8 +464,12 @@ void MainMenu::on_UserInfo_changed() {
     QString gUserName = userInfoForm->getUserName();
     ui->userNameLabel->setText(gUserName);
     emit submitUserNameData(gUserName);
+#ifdef USING_SET_FOCUS_METHOD
     this->activateWindow();
     this->setFocus();
+#else
+    ui->stackedWidget->setCurrentWidget(this->currentPage);
+#endif
 }
 
 void MainMenu::on_changeUserNameButton_clicked()
