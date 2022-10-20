@@ -11,6 +11,7 @@ FileExport::FileExport(QWidget *parent) :
     ui(new Ui::FileExport)
 {
     ui->setupUi(this);
+    this->setWindowTitle("検査データをCSVファイル保存");
     ui->stackedWidget->setCurrentWidget(ui->exportOption);
     dbController = new DbController(this);
 
