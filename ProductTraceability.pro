@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui network
+QT       += core gui network sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -32,7 +32,9 @@ SOURCES += main.cpp\
     tcpclient.cpp \
     userinfo.cpp \
     dialog.cpp \
-    popupstatus.cpp
+    popupstatus.cpp \
+    fileexport.cpp \
+    dbcontroller.cpp
 
 HEADERS  += mainmenu.h \
     globalapplication.h \
@@ -41,10 +43,13 @@ HEADERS  += mainmenu.h \
     tcpclient.h \
     userinfo.h \
     dialog.h \
-    popupstatus.h
+    popupstatus.h \
+    fileexport.h \
+    dbcontroller.h
 
 FORMS    += mainmenu.ui \
     statusitemwidget.ui \
     userinfo.ui \
     dialog.ui \
-    popupstatus.ui
+    popupstatus.ui \
+    fileexport.ui

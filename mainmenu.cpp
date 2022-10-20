@@ -493,7 +493,20 @@ void MainMenu::on_actionImport_triggered()
 
 void MainMenu::on_actionExport_triggered()
 {
-    qDebug() << "Export selected";
+
+    QString engine     = "mysql";
+    QString driver     = "ODBC";
+    QString server     = "192.168.0.39";
+    int port           = 3306;
+    QString dbName     = "miwa_CPU__RDCA";
+    QString userid     = "miwakensa";
+    QString password   = "hinoeng";
+    FileExport *exportWizard = new FileExport(this);
+    exportWizard->exportDBInit(engine, driver, server, port, dbName, userid, password);
+    exportWizard->setAttribute(Qt::WA_DeleteOnClose);
+    exportWizard->show();
+    exportWizard->raise();
+    exportWizard->isActiveWindow();
 }
 
 

@@ -10,7 +10,7 @@
 #include "dialog.h"
 #include "popupstatus.h"
 #include "userinfo.h"
-
+#include "fileexport.h"
 
 typedef enum _PT_PAGE_STAGE_T {
     PT_PAGE_STAGE_HOME,
