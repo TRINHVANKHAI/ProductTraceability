@@ -502,6 +502,7 @@ void MainMenu::on_actionExport_triggered()
     QString userid     = "miwakensa";
     QString password   = "hinoeng";
     FileExport *exportWizard = new FileExport(this);
+    connect(exportWizard, SIGNAL(finished(int)), this, SLOT(on_exportWizardFinished(int)));
     exportWizard->exportDBInit(engine, driver, server, port, dbName, userid, password);
     exportWizard->setAttribute(Qt::WA_DeleteOnClose);
     exportWizard->show();
@@ -509,6 +510,10 @@ void MainMenu::on_actionExport_triggered()
     exportWizard->isActiveWindow();
 }
 
+void MainMenu::on_exportWizardFinished(int flg) {
+    ui->statusbar->showMessage("Export is finished ");
+    ui->stackedWidget->setCurrentWidget(this->currentPage);
+}
 
 void MainMenu::on_actionSave_triggered()
 {

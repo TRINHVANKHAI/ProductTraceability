@@ -54,6 +54,7 @@ public slots:
     void on_popupStatusMessage(QString msg);
     void on_popupStatusMessageClose();
     void on_showTestProgress(QString msg);
+    void on_exportWizardFinished(int);
 private slots:
     void on_cpuButton_clicked();
 
