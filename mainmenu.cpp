@@ -22,10 +22,9 @@ MainMenu::MainMenu(QWidget *parent) :
 
     server = new TcpServer(this);
 
-
     userInfoForm = new UserInfo(this);
     userInfoForm->setWindowTitle("担当者名");
-    connect(userInfoForm, SIGNAL(accepted()), this, SLOT(on_UserInfo_changed()));
+    connect(userInfoForm, SIGNAL(accepted()), this, SLOT(on_UserInfoChanged()));
     QString usrName = userInfoForm->getUserName();
     if(usrName.isNull() || usrName.isEmpty()) {
         userInfoForm->show();
@@ -277,7 +276,6 @@ void MainMenu::eventKeyPressed(QKeyEvent* event)
         }
         break;
     }
-
 }
 
 int MainMenu::on_submitStatusChanged(SUBMIT_STATUS_T submitStatus) {
@@ -340,9 +338,7 @@ void MainMenu::showTestResult(QString statusNo, QString statusName, QString sts)
         statusItemWidget *tempWidget = new statusItemWidget(statusNo, statusName, sts, lanWidgetItem, this);
         ui->lanListWidget->addItem(lanWidgetItem);
         ui->lanListWidget->setItemWidget(lanWidgetItem, tempWidget);
-
     }
-
 }
 
 void MainMenu::on_postTestResults(QByteArray data) {
@@ -405,6 +401,7 @@ void MainMenu::on_popupQueryMessage(QString msg) {
     if(popupQuery) {
         qDebug() << "MainMenu::Prevented multiple dialogs opening";
         delete popupQuery;
+        this->popupQuery = nullptr;
     }
 
     popupQuery = new Dialog(this);
@@ -422,18 +419,16 @@ void MainMenu::on_popupQueryMessageFinished() {
         delete this->popupQuery;
         this->popupQuery = nullptr;
     }
-#ifdef USING_SET_FOCUS_METHOD
-    this->activateWindow();
-    this->setFocus();
-#else
+
     ui->stackedWidget->setCurrentWidget(this->currentPage);
-#endif
+
 }
 
 void MainMenu::on_popupStatusMessage(QString msg) {
     if(popupStatus) {
         qDebug() << "MainMenu::Prevented multiple dialogs opening";
         delete popupStatus;
+        this->popupStatus = nullptr;
     }
     popupStatus = new PopupStatus(this);
     popupStatus->setWindowTitle("Message");
@@ -448,28 +443,19 @@ void MainMenu::on_popupStatusMessageClose() {
         delete this->popupStatus;
         this->popupStatus = nullptr;
     }
-#ifdef USING_SET_FOCUS_METHOD
-    this->activateWindow();
-    this->setFocus();
-#else
     ui->stackedWidget->setCurrentWidget(this->currentPage);
-#endif
+
 }
 
 void MainMenu::on_showTestProgress(QString msg) {
     ui->statusbar->showMessage(msg);
 }
 
-void MainMenu::on_UserInfo_changed() {
+void MainMenu::on_UserInfoChanged() {
     QString gUserName = userInfoForm->getUserName();
     ui->userNameLabel->setText(gUserName);
     emit submitUserNameData(gUserName);
-#ifdef USING_SET_FOCUS_METHOD
-    this->activateWindow();
-    this->setFocus();
-#else
     ui->stackedWidget->setCurrentWidget(this->currentPage);
-#endif
 }
 
 void MainMenu::on_changeUserNameButton_clicked()
@@ -519,7 +505,6 @@ void MainMenu::on_actionSave_triggered()
 {
     ui->statusbar->showMessage("Save is not implemented yet");
 }
-
 
 void MainMenu::on_actionExit_triggered()
 {

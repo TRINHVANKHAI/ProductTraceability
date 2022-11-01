@@ -64,7 +64,7 @@ private slots:
 
     void on_lanGoHome_clicked();
     void on_changeUserNameButton_clicked();
-    void on_UserInfo_changed();
+    void on_UserInfoChanged();
 
     void on_actionOpen_triggered();
 
