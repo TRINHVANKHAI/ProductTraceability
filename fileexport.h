@@ -16,7 +16,7 @@ class FileExport : public QDialog
 public:
     explicit FileExport(QWidget *parent = nullptr);
     ~FileExport();
-    void setExportFileName(QString filename);
+    //void setExportFileName(QString filename);
     void exportDBInit(QString, QString, QString, int, QString, QString, QString);
 
 signals:
@@ -36,6 +36,11 @@ private slots:
 
     void on_csvSelectButton_clicked();
 
+    void on_startDateTimeChanged(QDateTime sdt);
+    void on_endDateTimeChanged(QDateTime edt);
+
+    void on_csvCancelButton_clicked();
+
 private:
     void connectToDBRequest(QString, QString, QString, int, QString, QString, QString);
     void disconnectFromDBRequest();
@@ -50,6 +55,8 @@ private:
     QString userid;
     QString password;
     Ui::FileExport *ui;
+    QDateTime startDateTime;
+    QDateTime endDateTime;
     DbController *dbController;
 };
 

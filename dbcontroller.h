@@ -14,7 +14,7 @@ public:
     void run();
     bool checkIfTableExists(QString);
     bool checkIfConnected();
-    int exportToCSVFile(QString table, QString filename);
+    int exportToCSVFile(QString table, QString csvExportDir, QDateTime begin, QDateTime end);
 
 public slots:
     void connectToServerRequested(QString, QString, QString, int, QString, QString, QString, bool);

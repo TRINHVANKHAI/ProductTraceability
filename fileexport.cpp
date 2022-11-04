@@ -13,6 +13,21 @@ FileExport::FileExport(QWidget *parent) :
     ui->setupUi(this);
     this->setWindowTitle("検査データをCSVファイル保存");
     ui->stackedWidget->setCurrentWidget(ui->exportOption);
+    QTime lastTimeOfDay(23,59,59,999);
+
+    endDateTime = QDateTime::currentDateTime();
+    startDateTime = endDateTime.addDays(0);
+    QDateTime lastDateTime = endDateTime;
+    lastDateTime.setTime(lastTimeOfDay);
+    ui->startDateEdit->setDateTime(startDateTime);
+    ui->endDateEdit->setDateTime(endDateTime);
+
+    ui->startDateEdit->setMaximumDateTime(lastDateTime);
+    ui->endDateEdit->setMaximumDateTime(lastDateTime);
+
+    connect(ui->endDateEdit, SIGNAL(dateTimeChanged(QDateTime)), this, SLOT(on_endDateTimeChanged(QDateTime)));
+    connect(ui->startDateEdit, SIGNAL(dateTimeChanged(QDateTime)), this, SLOT(on_startDateTimeChanged(QDateTime)));
+
     dbController = new DbController(this);
 
     //widget->db
@@ -66,29 +81,27 @@ void FileExport::on_dbErrorWithConnection(QString err) {
 }
 
 
-void FileExport::setExportFileName(QString filename) {
-    csvExportFileName = filename;
-}
-
 void FileExport::on_exportButton_clicked()
 {
 
     if(ui->cpuDataExportRadioButton->isChecked()) {
         dbName = "miwa_CPU__RDCA";
         dbTableName = "RDCA-B01_776884+_general_A_01";
-        setExportFileName("RDCA-B01_776884+_general_A_01.csv");
     } else if (ui->lanDataExportRadioButton->isChecked()) {
         dbName = "miwa_LAN__EUCU";
         dbTableName = "EUCU-A03_E33082+_general_A_01";
-        setExportFileName("EUCU-A03_E33082+_general_A_01.csv");
     } else {
         return;
     }
     connectToDBRequest(engine, driver, server, port, dbName, userid, password);
-    int ret = dbController->exportToCSVFile(dbTableName, csvExportDirectory+tr("/")+csvExportFileName);
-    if(ret==0)
-    qDebug() << "Export to file :" << csvExportDirectory+tr("/")+csvExportFileName;
-    this->accept();
+    int ret = dbController->exportToCSVFile(dbTableName, csvExportDirectory, startDateTime, endDateTime);
+    if(ret==0) {
+        qDebug() << "Export to file succeed:" << csvExportDirectory;
+        this->accept();
+    } else {
+        qDebug() << "Export to file failed :" << csvExportDirectory;
+        this->reject();
+    }
     disconnectFromDBRequest();
 }
 
@@ -108,5 +121,20 @@ void FileExport::on_csvSelectButton_clicked()
     ui->filenameLabel->setText(csvExportDirectory);
     ui->stackedWidget->setCurrentWidget(ui->exportPage);
 
+}
+
+void FileExport::on_startDateTimeChanged(QDateTime sdt) {
+    startDateTime = sdt;
+    ui->endDateEdit->setMinimumDateTime(startDateTime);
+}
+
+void FileExport::on_endDateTimeChanged(QDateTime edt) {
+    endDateTime = edt;
+    ui->startDateEdit->setMaximumDateTime(endDateTime);
+}
+
+void FileExport::on_csvCancelButton_clicked()
+{
+    this->reject();
 }
 
