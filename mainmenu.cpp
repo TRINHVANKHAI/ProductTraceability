@@ -23,7 +23,7 @@ MainMenu::MainMenu(QWidget *parent) :
     server = new TcpServer(this);
 
     userInfoForm = new UserInfo(this);
-    userInfoForm->setWindowTitle("担当者名");
+    userInfoForm->setWindowTitle("担当者姓名");
     connect(userInfoForm, SIGNAL(accepted()), this, SLOT(on_UserInfoChanged()));
     QString usrName = userInfoForm->getUserName();
     if(usrName.isNull() || usrName.isEmpty()) {
@@ -185,7 +185,7 @@ void MainMenu::eventKeyPressed(QKeyEvent* event)
     case Qt::Key_Return:
         clearTestResults();
         if(this->currentPage == ui->lanPage) {
-            if ((inputField == PT_INPUT_FIELD_SERIAL_NUMBER) && (inputValue.size() == 30)) {
+            if ((inputField == PT_INPUT_FIELD_SERIAL_NUMBER) && serialNumberFormatCheck(inputValue, QString("EUCU"), 30)) {
                 serialNumber = inputValue;
                 ui->lanSerialStatus->setStyleSheet("QLabel { background-color : rgb(255, 255, 255); color : black; }");
                 ui->lanSerialStatus->setText(inputValue);
@@ -197,20 +197,28 @@ void MainMenu::eventKeyPressed(QKeyEvent* event)
                 ui->lanMacInputField->setText("");
                 ui->lanMacInputFrame->setStyleSheet("QFrame { border: 1px solid rgb(50,205,50); }");
 
+                macAddress.clear();
+                ui->lanMacStatus->setStyleSheet("QLabel { background-color : rgb(255, 255, 255); color : black; }");
+                ui->lanMacStatus->setText("");
                 inputValue.clear();
                 inputField = PT_INPUT_FIELD_MAC_ADDRESS;
 
-            } else if ((inputField == PT_INPUT_FIELD_SERIAL_NUMBER) && (inputValue.size() != 30)) {
+            } else if ((inputField == PT_INPUT_FIELD_SERIAL_NUMBER) && (!serialNumberFormatCheck(inputValue, QString("EUCU"), 30))) {
                 qDebug() << "LAN:: Error SN : " << inputValue;
                 ui->lanSerialStatus->setStyleSheet("QLabel { background-color : yellow; color : red; }");
                 ui->lanSerialStatus->setText("シリアル番号入力エラー");
                 ui->lanSerialInputField->setStyleSheet("QLabel { background-color : rgb(255, 255, 255); color : black; }");
                 ui->lanSerialInputField->setText("");
                 ui->lanSerialInputFrame->setStyleSheet("QFrame { border: 1px solid rgb(50,205,50); }");
+
+                macAddress.clear();
+                ui->lanMacStatus->setStyleSheet("QLabel { background-color : rgb(255, 255, 255); color : black; }");
+                ui->lanMacStatus->setText("");
+
                 inputValue.clear();
                 inputField = PT_INPUT_FIELD_SERIAL_NUMBER;
 
-            } else if ((inputField == PT_INPUT_FIELD_MAC_ADDRESS) && (inputValue.size() == 5)) {
+            } else if ((inputField == PT_INPUT_FIELD_MAC_ADDRESS) && macAddressFormatCheck(inputValue, 5)) {
                 macAddress = inputValue;
 
                 emit submitLanData(serialNumber, macAddress);
@@ -227,7 +235,7 @@ void MainMenu::eventKeyPressed(QKeyEvent* event)
                 inputValue.clear();
                 inputField = PT_INPUT_FIELD_SERIAL_NUMBER;
 
-            } else if ((inputField == PT_INPUT_FIELD_MAC_ADDRESS) && (inputValue.size() != 5)) {
+            } else if ((inputField == PT_INPUT_FIELD_MAC_ADDRESS) && (!macAddressFormatCheck(inputValue, 5))) {
                 qDebug() << "LAN:: Error MAC: " << inputValue;
                 ui->lanMacStatus->setStyleSheet("QLabel { background-color : yellow; color : red; }");
                 ui->lanMacStatus->setText("MACアドレス入力エラー");
@@ -243,7 +251,7 @@ void MainMenu::eventKeyPressed(QKeyEvent* event)
             }
 
         } else if (this->currentPage == ui->cpuPage) {
-            if ((inputField == PT_INPUT_FIELD_SERIAL_NUMBER) && (inputValue.size() == 30)) {
+            if ((inputField == PT_INPUT_FIELD_SERIAL_NUMBER) && serialNumberFormatCheck(inputValue, QString("RDCA"), 30)) {
                 serialNumber = inputValue;
                 emit submitCpuData(serialNumber);
                 ui->cpuSerialStatus->setStyleSheet("QLabel { background-color : rgb(255, 255, 255); color : black; }");
@@ -252,7 +260,7 @@ void MainMenu::eventKeyPressed(QKeyEvent* event)
                 ui->cpuSerialInputField->setText("");
                 inputValue.clear();
                 inputField = PT_INPUT_FIELD_SERIAL_NUMBER;
-            } else if ((inputField == PT_INPUT_FIELD_SERIAL_NUMBER) && (inputValue.size() != 30)) {
+            } else if ((inputField == PT_INPUT_FIELD_SERIAL_NUMBER) && (!serialNumberFormatCheck(inputValue, QString("RDCA"), 30))) {
                 qDebug() << "CPU:: Error SN : " << inputValue;
                 ui->cpuSerialStatus->setStyleSheet("QLabel { background-color : yellow; color : red; }");
                 ui->cpuSerialStatus->setText("無効な入力エラー");
@@ -302,6 +310,28 @@ int MainMenu::on_submitStatusChanged(SUBMIT_STATUS_T submitStatus) {
         break;
     }
     return 0;
+}
+
+bool MainMenu::serialNumberFormatCheck(QString serialNo, QString prefix, int length) {
+    QString reString = QString("^") + prefix + QString("-[0-9A-Z]{5}(\\d){20}$");
+    QRegularExpression re(reString, QRegularExpression::CaseInsensitiveOption);
+    QRegularExpressionMatch match = re.match(serialNo);
+    if (length != serialNo.size())
+        return false;
+    if (!match.hasMatch())
+        return false;
+    return true;
+}
+
+bool MainMenu::macAddressFormatCheck(QString macAddr, int length) {
+    QString reString = QString("^[0-9A-F]{")+QString::number(length)+QString("}$");
+    QRegularExpression re(reString, QRegularExpression::CaseInsensitiveOption);
+    QRegularExpressionMatch match = re.match(macAddr);
+    if(length != macAddr.size())
+        return false;
+    if (!match.hasMatch())
+        return false;
+    return true;
 }
 
 void MainMenu::clearTestResults() {

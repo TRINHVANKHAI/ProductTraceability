@@ -30,7 +30,7 @@
     </font>
    </property>
    <property name="title">
-    <string>試験担当者</string>
+    <string>試験担当者のフルネームを入力してください</string>
    </property>
    <widget class="QPushButton" name="regiserButton">
     <property name="geometry">

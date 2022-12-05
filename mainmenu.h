@@ -96,6 +96,8 @@ private:
     unsigned int overallTestStatus;
     unsigned int overallTestCount;
     void eventKeyPressed(QKeyEvent* event);
+    bool serialNumberFormatCheck(QString serialNo, QString prefix, int length);
+    bool macAddressFormatCheck(QString macAddr, int length);
 };
 
 
